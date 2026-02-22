@@ -392,21 +392,6 @@ Docker not running:
 Start Docker Desktop
 ```
 
----
-
-# 📞 Team Contact
-
-| Role | Status |
-|------|--------|
-Team Lead | Active |
-Frontend Engineer | Active |
-Analysis Engineer | Active |
-
-Standup: Daily 9:00 AM  
-Code Review: Daily 4:00 PM  
-
----
-
 # ✅ Status
 
 Foundation Phase: **Complete**
