@@ -1,26 +1,17 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2023",
-    "lib": ["ES2023"],
-    "module": "ESNext",
-    "types": ["node"],
+    "composite": true,                   // ✅ Required for referenced projects
     "skipLibCheck": true,
-
-    /* Bundler mode */
+    "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
+    "allowSyntheticDefaultImports": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "target": "ES2020",                   // Added target
+    "lib": ["ES2020"],                     // Added lib
+    "emitDeclarationOnly": false,          // ✅ Explicitly set emit
+    "declaration": true,                   // Generate declarations
+    "declarationMap": true,                 // Generate declaration maps
+    "outDir": "./dist-node"                 // Output directory for node types
   },
   "include": ["vite.config.ts"]
 }

@@ -1,5 +1,5 @@
-// module_frontend/src/pages/Dashboard.tsx
-import React, { useEffect, useState } from 'react';
+// src/pages/Dashboard.tsx - FIXED VERSION
+import React, { useState } from 'react';  // ✅ Removed unused useEffect
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
 import MetricsCard from '../components/dashboard/MetricsCard';
@@ -12,20 +12,45 @@ import {
   ClockIcon 
 } from '@heroicons/react/24/outline';
 
+// Define types
+interface DashboardStats {
+  totalIssues: number;
+  criticalIssues: number;
+  filesAnalyzed: number;
+  avgTime: string;
+  issueChange: number;
+  criticalChange: number;
+  filesChange: number;
+  timeChange: number;
+  trendData?: any[];
+  distribution?: any[];
+}
+
 const Dashboard: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
 
   // Fetch dashboard stats
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats', selectedProject],
     queryFn: () => api.getDashboardStats(selectedProject),
-    refetchInterval: 30000 // Refresh every 30 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
+    initialData: {
+      totalIssues: 0,
+      criticalIssues: 0,
+      filesAnalyzed: 0,
+      avgTime: '0s',
+      issueChange: 0,
+      criticalChange: 0,
+      filesChange: 0,
+      timeChange: 0
+    }
   });
 
   // Fetch recent analyses
   const { data: recentAnalyses } = useQuery({
     queryKey: ['recent-analyses'],
-    queryFn: () => api.getRecentAnalyses()
+    queryFn: () => api.getRecentAnalyses(),
+    initialData: []
   });
 
   const metrics = [
@@ -109,29 +134,35 @@ const Dashboard: React.FC = () => {
           <h2 className="text-lg font-semibold">Recent Analyses</h2>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {recentAnalyses?.map((analysis: any) => (
-            <div key={analysis.id} className="p-6 flex items-center justify-between">
-              <div>
-                <p className="font-medium">{analysis.projectName}</p>
-                <p className="text-sm text-gray-500">
-                  {new Date(analysis.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex space-x-2">
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">
-                    {analysis.critical} critical
-                  </span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
-                    {analysis.high} high
-                  </span>
-                </div>
-                <button className="text-blue-600 hover:text-blue-800">
-                  View Results
-                </button>
-              </div>
+          {recentAnalyses.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              No recent analyses found
             </div>
-          ))}
+          ) : (
+            recentAnalyses.map((analysis: any) => (
+              <div key={analysis.id} className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{analysis.projectName}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(analysis.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex space-x-2">
+                    <span className="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">
+                      {analysis.critical} critical
+                    </span>
+                    <span className="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
+                      {analysis.high} high
+                    </span>
+                  </div>
+                  <button className="text-blue-600 hover:text-blue-800">
+                    View Results
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

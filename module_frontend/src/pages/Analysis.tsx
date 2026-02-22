@@ -1,4 +1,4 @@
-// Analysis.tsx - FIXED VERSION
+// src/pages/Analysis.tsx - FIXED VERSION
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeEditor from '../components/analysis/CodeEditor';
@@ -6,42 +6,11 @@ import FileUploader from '../components/analysis/FileUploader';
 import IssueList from '../components/analysis/IssueList';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
-
-// Define types
-interface UploadedFile {
-  path: string;
-  content: string;
-  language: string;
-  size: number;
-}
-
-interface Issue {
-  file_path: string;
-  rule_id: string;
-  message: string;
-  severity: string;
-  line_start: number;
-  line_end: number;
-  column_start: number;
-  column_end: number;
-  suggestion: string;
-}
-
-interface AnalysisResults {
-  analysis_id: string;
-  total_issues: number;
-  issues: Issue[];
-  summary: {
-    critical: number;
-    high: number;
-    medium: number;
-    low: number;
-  };
-}
+import { Issue, AnalysisResults, UploadedFile } from '../types';
 
 const Analysis: React.FC = () => {
   const params = useParams<{ id?: string }>();
-  const id = params.id; // Now 'id' is used
+  const id = params.id;
   
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
@@ -96,6 +65,10 @@ const Analysis: React.FC = () => {
   const handleIssueClick = (issue: Issue) => {
     console.log('Issue clicked:', issue);
     // You can add logic to scroll to the issue in editor
+    // For example, if using monaco editor, you can:
+    // editor.revealLineInCenter(issue.line_start);
+    // editor.setPosition({ lineNumber: issue.line_start, column: issue.column_start });
+    toast.success(`Navigated to issue at line ${issue.line_start}`);
   };
 
   return (
@@ -127,7 +100,9 @@ const Analysis: React.FC = () => {
       <div className="flex-1 flex gap-4 min-h-0">
         {/* Left Panel - File List */}
         <div className="w-64 bg-white dark:bg-gray-800 rounded-lg shadow p-4 overflow-y-auto">
-          <h2 className="font-semibold mb-4">Files ({files.length})</h2>
+          <h2 className="font-semibold mb-4 text-gray-900 dark:text-white">
+            Files ({files.length})
+          </h2>
           {files.length === 0 ? (
             <p className="text-gray-500 text-sm">No files uploaded</p>
           ) : (

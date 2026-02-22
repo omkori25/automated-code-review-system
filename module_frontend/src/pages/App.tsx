@@ -5,15 +5,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
 // Pages
-import Dashboard from './pages/Dashboard';
-import Analysis from './pages/Analysis';
-import Projects from './pages/Projects';
-import Settings from './pages/Settings';
-import Login from './pages/Login';
+import Dashboard from './Dashboard';
+import Analysis from './Analysis';
+import Projects from './Projects';
+import Settings from './Settings';
+import Login from './Login';
 
 // Components
-import Layout from './components/Layout/Layout';
-import ProtectedRoute from './components/Auth/ProtectedRoute';
+import Layout from '../components/Layout/Layout';
+import ProtectedRoute from '../components/Auth/ProtectedRoute';
 
 // Styles
 import './App.css';

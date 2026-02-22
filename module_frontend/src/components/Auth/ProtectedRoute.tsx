@@ -7,13 +7,19 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  // Replace this with your actual auth logic
-  const isAuthenticated = true; // For testing, set to true to bypass login
+  // Check if user is authenticated
+  // For demo, check if token exists in localStorage
+  const isAuthenticated = localStorage.getItem('auth_token') !== null;
+  
+  // For development, you can set this to true to bypass authentication
+  // const isAuthenticated = true;
   
   if (!isAuthenticated) {
+    // Redirect to login page if not authenticated
     return <Navigate to="/login" replace />;
   }
 
+  // Render children if authenticated
   return <>{children}</>;
 };
 
