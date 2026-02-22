@@ -1,4 +1,4 @@
-// module_frontend/src/pages/Analysis.tsx
+// Analysis.tsx - FIXED VERSION
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeEditor from '../components/analysis/CodeEditor';
@@ -7,14 +7,48 @@ import IssueList from '../components/analysis/IssueList';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
 
+// Define types
+interface UploadedFile {
+  path: string;
+  content: string;
+  language: string;
+  size: number;
+}
+
+interface Issue {
+  file_path: string;
+  rule_id: string;
+  message: string;
+  severity: string;
+  line_start: number;
+  line_end: number;
+  column_start: number;
+  column_end: number;
+  suggestion: string;
+}
+
+interface AnalysisResults {
+  analysis_id: string;
+  total_issues: number;
+  issues: Issue[];
+  summary: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+
 const Analysis: React.FC = () => {
-  const { id } = useParams();
-  const [files, setFiles] = useState<any[]>([]);
-  const [selectedFile, setSelectedFile] = useState<any>(null);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const params = useParams<{ id?: string }>();
+  const id = params.id; // Now 'id' is used
+  
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResults | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleFilesUploaded = async (uploadedFiles: any[]) => {
+  const handleFilesUploaded = async (uploadedFiles: UploadedFile[]) => {
     setFiles(uploadedFiles);
     setSelectedFile(uploadedFiles[0]);
     toast.success(`${uploadedFiles.length} files uploaded`);
@@ -29,23 +63,27 @@ const Analysis: React.FC = () => {
     setIsAnalyzing(true);
     try {
       // Start analysis
-      const response = await api.startAnalysis('default-project', files);
+      const response = await api.startAnalysis(id || 'default-project', files);
       const analysisId = response.analysis_id;
 
       // Poll for results
       const checkInterval = setInterval(async () => {
-        const status = await api.getAnalysisStatus(analysisId);
-        
-        if (status.status === 'completed') {
-          clearInterval(checkInterval);
-          const results = await api.getAnalysisResults(analysisId);
-          setAnalysisResults(results);
-          setIsAnalyzing(false);
-          toast.success('Analysis completed!');
-        } else if (status.status === 'failed') {
-          clearInterval(checkInterval);
-          setIsAnalyzing(false);
-          toast.error('Analysis failed');
+        try {
+          const status = await api.getAnalysisStatus(analysisId);
+          
+          if (status.status === 'completed') {
+            clearInterval(checkInterval);
+            const results = await api.getAnalysisResults(analysisId);
+            setAnalysisResults(results);
+            setIsAnalyzing(false);
+            toast.success('Analysis completed!');
+          } else if (status.status === 'failed') {
+            clearInterval(checkInterval);
+            setIsAnalyzing(false);
+            toast.error('Analysis failed');
+          }
+        } catch (error) {
+          console.error('Error checking status:', error);
         }
       }, 2000);
     } catch (error) {
@@ -55,18 +93,23 @@ const Analysis: React.FC = () => {
     }
   };
 
+  const handleIssueClick = (issue: Issue) => {
+    console.log('Issue clicked:', issue);
+    // You can add logic to scroll to the issue in editor
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Code Analysis
+          Code Analysis {id ? `- Project ${id}` : ''}
         </h1>
         <div className="space-x-4">
           <button
             onClick={handleStartAnalysis}
             disabled={isAnalyzing || files.length === 0}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isAnalyzing ? (
               <>
@@ -93,7 +136,7 @@ const Analysis: React.FC = () => {
                 <li
                   key={index}
                   onClick={() => setSelectedFile(file)}
-                  className={`p-2 rounded cursor-pointer ${
+                  className={`p-2 rounded cursor-pointer transition-colors ${
                     selectedFile?.path === file.path
                       ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300'
                       : 'hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -116,7 +159,7 @@ const Analysis: React.FC = () => {
               code={selectedFile.content}
               language={selectedFile.language}
               issues={analysisResults?.issues?.filter(
-                (i: any) => i.file_path === selectedFile.path
+                (i: Issue) => i.file_path === selectedFile.path
               )}
             />
           ) : (
@@ -131,10 +174,7 @@ const Analysis: React.FC = () => {
           <IssueList
             issues={analysisResults?.issues || []}
             summary={analysisResults?.summary}
-            onIssueClick={(issue) => {
-              // Highlight in editor
-              console.log('Issue clicked:', issue);
-            }}
+            onIssueClick={handleIssueClick}
           />
         </div>
       </div>
