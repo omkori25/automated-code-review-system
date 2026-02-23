@@ -1,15 +1,10 @@
 # module_backend/api/routes/health_routes.py
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
 from datetime import datetime
-from module_backend.database.database import get_db
-from module_backend.database import models
-import logging
 
-router = APIRouter(prefix="/health", tags=["Health"])
-logger = logging.getLogger(__name__)
+router = APIRouter(tags=["Health"])
 
-@router.get("/")
+@router.get("/health")
 async def health_check():
     """Basic health check"""
     return {
@@ -19,18 +14,20 @@ async def health_check():
         "version": "1.0.0"
     }
 
-@router.get("/database")
-async def database_health(db: Session = Depends(get_db)):
-    """Check database connection"""
+@router.get("/health/database")
+async def database_health():
+    """Database health check"""
     try:
-        # Try to execute a simple query
-        db.execute("SELECT 1").first()
+        # Try to import database module
+        from module_backend.database.database import engine
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
         return {
             "status": "connected",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        logger.error(f"Database connection failed: {e}")
         return {
             "status": "disconnected",
             "error": str(e),

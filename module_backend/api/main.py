@@ -1,111 +1,94 @@
-# module_utils/logging/logger_config.py
-import logging
-import logging.config
+# module_backend/api/main.py
 import sys
 import os
-from datetime import datetime
+from pathlib import Path
+import logging
 
-def setup_logging():
-    """Configure logging for the application"""
+# Add project root to Python path
+project_root = str(Path(__file__).parent.parent.parent)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+# Import routers - FIXED IMPORTS
+from module_backend.api.routes import health_routes, analysis_routes
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Try to import settings
+try:
+    from module_utils.config.settings import settings
+    logger.info(f"✅ Settings loaded: {settings.APP_NAME}")
+except Exception as e:
+    logger.warning(f"⚠️ Could not load settings: {e}")
     
-    # Create logs directory if it doesn't exist
-    log_dir = "logs"
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    
-    # Generate log filename with timestamp
-    log_filename = os.path.join(
-        log_dir, 
-        f"codereview_{datetime.now().strftime('%Y%m%d')}.log"
-    )
-    
-    # Logging configuration
-    LOGGING_CONFIG = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "standard": {
-                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                "datefmt": "%Y-%m-%d %H:%M:%S"
-            },
-            "detailed": {
-                "format": "%(asctime)s - %(name)s - %(levelname)s - %(module)s - %(lineno)d - %(message)s",
-                "datefmt": "%Y-%m-%d %H:%M:%S"
-            },
-            "colored": {
-                "format": "\033[36m%(asctime)s\033[0m - \033[32m%(name)s\033[0m - \033[1m%(levelname)s\033[0m - %(message)s",
-                "datefmt": "%Y-%m-%d %H:%M:%S"
-            }
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "colored",
-                "stream": sys.stdout
-            },
-            "file": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "level": "DEBUG",
-                "formatter": "detailed",
-                "filename": log_filename,
-                "maxBytes": 10485760,  # 10MB
-                "backupCount": 5,
-                "encoding": "utf8"
-            },
-            "error_file": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "level": "ERROR",
-                "formatter": "detailed",
-                "filename": os.path.join(log_dir, "errors.log"),
-                "maxBytes": 10485760,
-                "backupCount": 5,
-                "encoding": "utf8"
-            }
-        },
-        "root": {
-            "level": "DEBUG",
-            "handlers": ["console", "file", "error_file"]
-        },
-        "loggers": {
-            "uvicorn": {
-                "level": "INFO",
-                "handlers": ["console"],
-                "propagate": False
-            },
-            "uvicorn.error": {
-                "level": "INFO",
-                "handlers": ["error_file"],
-                "propagate": False
-            },
-            "sqlalchemy": {
-                "level": "WARNING",
-                "handlers": ["console"],
-                "propagate": False
-            },
-            "module_backend": {
-                "level": "DEBUG",
-                "handlers": ["console", "file"],
-                "propagate": False
-            },
-            "module_ml": {
-                "level": "INFO",
-                "handlers": ["console", "file"],
-                "propagate": False
-            },
-            "module_analysis_engine": {
-                "level": "DEBUG",
-                "handlers": ["console", "file"],
-                "propagate": False
-            }
+    class DummySettings:
+        CORS_ORIGINS = ["*"]
+        DEBUG = True
+        ENVIRONMENT = "development"
+        APP_NAME = "Code Review API"
+    settings = DummySettings()
+
+# Create FastAPI app
+app = FastAPI(
+    title="Code Review API",
+    description="Automated Code Review & Bug Detection System",
+    version="1.0.0"
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=getattr(settings, 'CORS_ORIGINS', ["*"]),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers - THIS IS CRITICAL
+app.include_router(health_routes.router, prefix="/api", tags=["Health"])
+app.include_router(analysis_routes.router, prefix="/api", tags=["Analysis"])
+
+# Also include without /api prefix for backward compatibility
+app.include_router(health_routes.router)
+app.include_router(analysis_routes.router)
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Code Review API",
+        "version": "1.0.0",
+        "status": "running",
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "analysis": "/analysis/upload"
         }
     }
-    
-    # Apply configuration
-    logging.config.dictConfig(LOGGING_CONFIG)
-    
-    # Log startup
-    logging.info("="*60)
-    logging.info("🚀 Logging configured successfully")
-    logging.info(f"Log file: {log_filename}")
-    logging.info("="*60)
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "healthy",
+        "timestamp": __import__('datetime').datetime.now().isoformat(),
+        "service": "code-review-backend",
+        "version": "1.0.0"
+    }
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("🚀 Starting up Code Review API...")
+    logger.info(f"Registered routes: {[route.path for route in app.routes]}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "module_backend.api.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
