@@ -60,8 +60,13 @@ class RuleManager:
         self._load_custom_rules()
     
     def _load_builtin_rules(self):
-        """Load built-in rules"""
-        # Python rules
+        """Load built-in rules for all languages"""
+        
+        # =========================================
+        # PYTHON RULES
+        # =========================================
+        
+        # Python - Imports
         self.add_rule(Rule(
             id="PY001",
             name="Wildcard Import",
@@ -72,6 +77,7 @@ class RuleManager:
             metadata={"effort": "low", "auto_fixable": True}
         ))
         
+        # Python - Functions
         self.add_rule(Rule(
             id="PY002",
             name="Long Function",
@@ -93,6 +99,17 @@ class RuleManager:
         ))
         
         self.add_rule(Rule(
+            id="PY006",
+            name="Missing Return Type Hint",
+            description="Function missing return type hint",
+            severity="low",
+            category="code_smell",
+            languages=["python"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        # Python - Classes
+        self.add_rule(Rule(
             id="PY004",
             name="God Class",
             description="Class has too many methods",
@@ -103,6 +120,17 @@ class RuleManager:
         ))
         
         self.add_rule(Rule(
+            id="PY007",
+            name="Missing __init__ Method",
+            description="Class missing __init__ method",
+            severity="low",
+            category="code_smell",
+            languages=["python"],
+            metadata={"effort": "low"}
+        ))
+        
+        # Python - Exceptions
+        self.add_rule(Rule(
             id="PY005",
             name="Bare Except",
             description="Bare except clause catches all exceptions",
@@ -112,14 +140,24 @@ class RuleManager:
             metadata={"effort": "low", "auto_fixable": True}
         ))
         
-        # Security rules
+        self.add_rule(Rule(
+            id="PY008",
+            name="Too Broad Except",
+            description="Catching Exception is too broad",
+            severity="medium",
+            category="bug",
+            languages=["python"],
+            metadata={"effort": "low"}
+        ))
+        
+        # Python - Security
         self.add_rule(Rule(
             id="SEC001",
             name="Eval Usage",
             description="Use of eval/exec is dangerous",
             severity="critical",
             category="security",
-            languages=["python", "javascript"],
+            languages=["python"],
             metadata={"effort": "medium"}
         ))
         
@@ -129,7 +167,7 @@ class RuleManager:
             description="Hardcoded password or token detected",
             severity="high",
             category="security",
-            languages=["python", "javascript", "java"],
+            languages=["python"],
             metadata={"effort": "low"}
         ))
         
@@ -139,7 +177,7 @@ class RuleManager:
             description="Possible SQL injection vulnerability",
             severity="critical",
             category="security",
-            languages=["python", "javascript", "java"],
+            languages=["python"],
             metadata={"effort": "medium"}
         ))
         
@@ -159,29 +197,29 @@ class RuleManager:
             description="Potential shell injection vulnerability",
             severity="critical",
             category="security",
-            languages=["python", "javascript"],
+            languages=["python"],
             metadata={"effort": "high"}
         ))
         
-        # Complexity rules
+        # Python - Complexity
         self.add_rule(Rule(
             id="CMP001",
             name="High Complexity",
             description="Function has high cyclomatic complexity",
             severity="medium",
             category="performance",
-            languages=["python", "javascript", "java"],
+            languages=["python"],
             metadata={"max_complexity": 10, "effort": "high"}
         ))
         
-        # Naming rules
+        # Python - Naming
         self.add_rule(Rule(
             id="NAM001",
             name="Class Naming",
             description="Class names should use CamelCase",
             severity="low",
             category="code_smell",
-            languages=["python", "java"],
+            languages=["python"],
             metadata={"effort": "low", "auto_fixable": True}
         ))
         
@@ -195,7 +233,17 @@ class RuleManager:
             metadata={"effort": "low", "auto_fixable": True}
         ))
         
-        # Documentation rules
+        self.add_rule(Rule(
+            id="NAM003",
+            name="Variable Naming",
+            description="Variable names should use snake_case",
+            severity="low",
+            category="code_smell",
+            languages=["python"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        # Python - Documentation
         self.add_rule(Rule(
             id="DOC001",
             name="Module Docstring",
@@ -213,6 +261,289 @@ class RuleManager:
             severity="low",
             category="code_smell",
             languages=["python"],
+            metadata={"effort": "low"}
+        ))
+        
+        self.add_rule(Rule(
+            id="DOC003",
+            name="Class Docstring",
+            description="Class missing docstring",
+            severity="low",
+            category="code_smell",
+            languages=["python"],
+            metadata={"effort": "low"}
+        ))
+        
+        # Python - Bugs
+        self.add_rule(Rule(
+            id="MUT001",
+            name="Mutable Default Arguments",
+            description="Mutable default argument detected",
+            severity="high",
+            category="bug",
+            languages=["python"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        # =========================================
+        # JAVASCRIPT / TYPESCRIPT RULES
+        # =========================================
+        
+        # JavaScript - Security
+        self.add_rule(Rule(
+            id="JS_SEC001",
+            name="JavaScript Eval Usage",
+            description="Use of eval() is dangerous and can lead to code injection",
+            severity="critical",
+            category="security",
+            languages=["javascript", "typescript"],
+            metadata={"effort": "low", "auto_fixable": False}
+        ))
+        
+        self.add_rule(Rule(
+            id="JS_SEC002",
+            name="setTimeout with String",
+            description="setTimeout with string argument is dangerous (similar to eval)",
+            severity="high",
+            category="security",
+            languages=["javascript", "typescript"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        self.add_rule(Rule(
+            id="JS_SEC003",
+            name="document.write Usage",
+            description="document.write() can lead to XSS vulnerabilities",
+            severity="high",
+            category="security",
+            languages=["javascript"],
+            metadata={"effort": "medium"}
+        ))
+        
+        self.add_rule(Rule(
+            id="JS_SEC004",
+            name="innerHTML with Dynamic Content",
+            description="innerHTML with dynamic content can lead to XSS",
+            severity="high",
+            category="security",
+            languages=["javascript", "typescript"],
+            metadata={"effort": "medium"}
+        ))
+        
+        # JavaScript - Functions
+        self.add_rule(Rule(
+            id="JS_FUNC001",
+            name="Long JavaScript Function",
+            description="Function is too long, consider breaking it down",
+            severity="low",
+            category="code_smell",
+            languages=["javascript", "typescript"],
+            metadata={"max_lines": 30, "effort": "medium"}
+        ))
+        
+        self.add_rule(Rule(
+            id="JS_FUNC002",
+            name="Too Many Parameters",
+            description="Function has too many parameters",
+            severity="low",
+            category="code_smell",
+            languages=["javascript", "typescript"],
+            metadata={"max_params": 5, "effort": "low"}
+        ))
+        
+        # JavaScript - Global
+        self.add_rule(Rule(
+            id="JS_GLOB001",
+            name="Global Namespace Pollution",
+            description="Too many global variables pollute the global namespace",
+            severity="medium",
+            category="code_smell",
+            languages=["javascript"],
+            metadata={"max_globals": 5, "effort": "high"}
+        ))
+        
+        # JavaScript - Async
+        self.add_rule(Rule(
+            id="JS_ASYNC001",
+            name="Missing await with fetch",
+            description="fetch() called without await in async function",
+            severity="medium",
+            category="bug",
+            languages=["javascript", "typescript"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        # JavaScript - React
+        self.add_rule(Rule(
+            id="JS_REACT001",
+            name="Hook Called Outside Component",
+            description="React hooks must be called in function components",
+            severity="high",
+            category="bug",
+            languages=["javascript", "typescript"],
+            metadata={"effort": "low"}
+        ))
+        
+        self.add_rule(Rule(
+            id="JS_REACT002",
+            name="Missing Key Prop",
+            description="Missing 'key' prop in list rendering",
+            severity="medium",
+            category="bug",
+            languages=["javascript", "typescript"],
+            metadata={"effort": "low", "auto_fixable": False}
+        ))
+        
+        # =========================================
+        # JAVA RULES
+        # =========================================
+        
+        # Java - Security
+        self.add_rule(Rule(
+            id="JAVA_SEC001",
+            name="Runtime.exec() Usage",
+            description="Runtime.exec() can lead to command injection",
+            severity="critical",
+            category="security",
+            languages=["java"],
+            metadata={"effort": "high"}
+        ))
+        
+        self.add_rule(Rule(
+            id="JAVA_SEC002",
+            name="SQL Injection",
+            description="Possible SQL injection vulnerability",
+            severity="critical",
+            category="security",
+            languages=["java"],
+            metadata={"effort": "medium"}
+        ))
+        
+        self.add_rule(Rule(
+            id="JAVA_SEC003",
+            name="Insecure Deserialization",
+            description="Insecure deserialization detected",
+            severity="high",
+            category="security",
+            languages=["java"],
+            metadata={"effort": "high"}
+        ))
+        
+        # Java - Exceptions
+        self.add_rule(Rule(
+            id="JAVA_EXC001",
+            name="Empty Catch Block",
+            description="Empty catch block detected",
+            severity="medium",
+            category="bug",
+            languages=["java"],
+            metadata={"effort": "low"}
+        ))
+        
+        self.add_rule(Rule(
+            id="JAVA_EXC002",
+            name="Generic Exception Catch",
+            description="Catching generic Exception is too broad",
+            severity="medium",
+            category="code_smell",
+            languages=["java"],
+            metadata={"effort": "low"}
+        ))
+        
+        # Java - Serialization
+        self.add_rule(Rule(
+            id="JAVA_SER001",
+            name="Missing serialVersionUID",
+            description="Serializable class missing serialVersionUID",
+            severity="medium",
+            category="code_smell",
+            languages=["java"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        # Java - Naming
+        self.add_rule(Rule(
+            id="JAVA_NAM001",
+            name="Class Naming Convention",
+            description="Class names should start with uppercase letter",
+            severity="low",
+            category="code_smell",
+            languages=["java"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        self.add_rule(Rule(
+            id="JAVA_NAM002",
+            name="Method Naming Convention",
+            description="Method names should start with lowercase letter",
+            severity="low",
+            category="code_smell",
+            languages=["java"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        self.add_rule(Rule(
+            id="JAVA_NAM003",
+            name="Constant Naming Convention",
+            description="Constants should be UPPER_SNAKE_CASE",
+            severity="low",
+            category="code_smell",
+            languages=["java"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        # Java - Complexity
+        self.add_rule(Rule(
+            id="JAVA_CMP001",
+            name="God Class",
+            description="Class has too many methods",
+            severity="medium",
+            category="code_smell",
+            languages=["java"],
+            metadata={"max_methods": 15, "effort": "high"}
+        ))
+        
+        # =========================================
+        # GENERAL RULES (All Languages)
+        # =========================================
+        
+        self.add_rule(Rule(
+            id="GEN001",
+            name="TODO Comment",
+            description="TODO comment found - indicates incomplete code",
+            severity="low",
+            category="code_smell",
+            languages=["python", "javascript", "typescript", "java", "go", "rust"],
+            metadata={"effort": "low"}
+        ))
+        
+        self.add_rule(Rule(
+            id="GEN002",
+            name="FIXME Comment",
+            description="FIXME comment found - indicates known issue",
+            severity="medium",
+            category="bug",
+            languages=["python", "javascript", "typescript", "java", "go", "rust"],
+            metadata={"effort": "low"}
+        ))
+        
+        self.add_rule(Rule(
+            id="GEN003",
+            name="Debug Print Statement",
+            description="Debug print statement found in production code",
+            severity="low",
+            category="code_smell",
+            languages=["python", "javascript", "typescript", "java"],
+            metadata={"effort": "low", "auto_fixable": True}
+        ))
+        
+        self.add_rule(Rule(
+            id="GEN004",
+            name="Empty File",
+            description="File contains no code",
+            severity="low",
+            category="code_smell",
+            languages=["python", "javascript", "typescript", "java"],
             metadata={"effort": "low"}
         ))
     
@@ -344,18 +675,28 @@ class RuleManager:
     
     def get_statistics(self) -> Dict:
         """Get rule statistics"""
+        rules_list = list(self.rules.values())
+        
         return {
-            "total_rules": len(self.rules),
+            "total_rules": len(rules_list),
             "by_category": {
-                category: len(self.get_rules_by_category(category))
-                for category in self.categories
+                category: len([r for r in rules_list if r.category == category])
+                for category in self.categories.keys()
             },
             "by_severity": {
-                severity: len(self.get_rules_by_severity(severity))
+                severity: len([r for r in rules_list if r.severity == severity])
                 for severity in ['critical', 'high', 'medium', 'low']
             },
-            "enabled_rules": len([r for r in self.rules.values() if r.enabled]),
-            "custom_rules": len([r for r in self.rules.values() if r.custom])
+            "by_language": {
+                "python": len([r for r in rules_list if 'python' in r.languages]),
+                "javascript": len([r for r in rules_list if 'javascript' in r.languages]),
+                "typescript": len([r for r in rules_list if 'typescript' in r.languages]),
+                "java": len([r for r in rules_list if 'java' in r.languages]),
+                "go": len([r for r in rules_list if 'go' in r.languages]),
+                "rust": len([r for r in rules_list if 'rust' in r.languages]),
+            },
+            "enabled_rules": len([r for r in rules_list if r.enabled]),
+            "custom_rules": len([r for r in rules_list if r.custom])
         }
 
 # Create singleton instance
